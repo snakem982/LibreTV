@@ -123,16 +123,20 @@ function isValidUrl(urlString) {
 }
 
 // 修复反向代理处理过的路径
-app.use('/proxy', (req, res, next) => {
-  const targetUrl = req.url.replace(/^\//, '').replace(/(https?:)\/([^/])/, '$1//$2');
-  req.url = '/' + encodeURIComponent(targetUrl);
-  next();
-});
+// app.use('/proxy', (req, res, next) => {
+//   const targetUrl = req.url.replace(/^\//, '').replace(/(https?:)\/([^/])/, '$1//$2');
+//   req.url = '/' + encodeURIComponent(targetUrl);
+//   next();
+// });
 
 // 代理路由
-app.get('/proxy/:encodedUrl', async (req, res) => {
+app.get('/proxy', async (req, res) => {
   try {
-    const encodedUrl = req.params.encodedUrl;
+    const encodedUrl = req.query.dst;
+    if (!encodedUrl) {
+      return res.status(400).send('缺少 dst 参数');
+    }
+
     const targetUrl = decodeURIComponent(encodedUrl);
 
     // 安全验证
